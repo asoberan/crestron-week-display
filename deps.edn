@@ -1,8 +1,8 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.12.6"}}
  :aliases
- {:run-m {:main-opts ["-m" "asoberan.crestron-week-display"]}
-  :run-x {:ns-default asoberan.crestron-week-display
+ {:run-m {:main-opts ["-m" "crestron-week-display.core"]}
+  :run-x {:ns-default crestron-week-display.core
           :exec-fn greet
           :exec-args {:name "Clojure"}}
   :build {:deps {io.github.clojure/tools.build {:mvn/version "0.10.14"}}

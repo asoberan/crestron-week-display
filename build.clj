@@ -4,7 +4,7 @@
 
 (def lib 'net.clojars.asoberan/crestron-week-display)
 (def version "0.1.0-SNAPSHOT")
-(def main 'asoberan.crestron-week-display)
+(def main 'crestron-week-display.core)
 (def class-dir "target/classes")
 
 (defn test "Run all the tests." [opts]

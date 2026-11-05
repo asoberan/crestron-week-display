@@ -1,4 +1,4 @@
-(ns asoberan.crestron-week-display
+(ns crestron-week-display.core
   (:gen-class))
 
 (defn greet
