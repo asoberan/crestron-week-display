@@ -55,7 +55,19 @@ Run that uberjar:
 
     $ java -jar target/net.clojars.asoberan/crestron-week-display-0.1.0-SNAPSHOT.jar
 
-## TODO: Options
+## TODO: Configuration
+
+The configuration is an EDN file with the following values:
+
+```edn
+{:tenant "YOUR_TENANT_ID"
+ :client-id "YOUR_CLIENT_ID"
+ :client-secret "YOUR_CLIENT_SECRET"
+ :rooms {"ROOM NAME" {:name "ROOM NAME"
+                      :email "ROOM_EMAIL@EXAMPLE.ORG"}
+ :port 4141 # Optional. Defaults to 3000.
+}
+```
 
 ## License
 
