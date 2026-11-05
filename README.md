@@ -1,14 +1,19 @@
-# asoberan/crestron-week-display
+# TODO: Crestron Week Display
 
-FIXME: my new application.
+A simple web application that uses the Microsoft Graph API to generate a weekly view of a calendar.
+The intention is for this to be displayed on a Crestron TS-1080, or any other similar kiosk-type system.
 
-## Installation
+## TODO: Development
 
-Download from https://github.com/asoberan/crestron-week-display
+If you are using Guix, you can create a development shell as follows:
 
-## Usage
+```bash
+guix time-machine -C channels.scm -- shell -m manifest.scm
+```
 
-FIXME: explanation
+## TODO: Installation
+
+## TODO: Usage
 
 Run the project directly, via `:exec-fn`:
 
@@ -50,21 +55,7 @@ Run that uberjar:
 
     $ java -jar target/net.clojars.asoberan/crestron-week-display-0.1.0-SNAPSHOT.jar
 
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
+## TODO: Options
 
 ## License
 
