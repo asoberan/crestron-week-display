@@ -1,5 +1,7 @@
 {:paths ["src" "resources"]
- :deps {org.clojure/clojure {:mvn/version "1.12.6"}}
+ :deps {org.clojure/clojure {:mvn/version "1.12.6"}
+        cheshire/cheshire {:mvn/version "6.2.1"}
+        hato/hato {:mvn/version "1.0.0"}}
  :aliases
  {:run-m {:main-opts ["-m" "crestron-week-display.core"]}
   :run-x {:ns-default crestron-week-display.core
