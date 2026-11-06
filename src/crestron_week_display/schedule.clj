@@ -1,26 +1,7 @@
 (ns crestron-week-display.schedule
-  (:require [crestron-week-display.graph :as graph])
-  (:import [java.time DayOfWeek Instant LocalDateTime ZonedDateTime ZoneId ZoneOffset]
-           [java.time.temporal TemporalAdjusters]))
+  (:import [java.time LocalDateTime ZonedDateTime ZoneId]))
 
 (set! *warn-on-reflection* true)
-
-; Convert now into a ZonedDateTime
-(defn zoned-now
-  [^Instant now zone]
-  (.atZone now (ZoneId/of zone)))
-
-; Return the work week for a corresponding now Instant.
-; Assumes the work week starts on a Monday and lasts for
-; 5 total days (e.g. Mon-Fri). May chaneg that in the future.
-(defn work-week-bounds
-  [^ZonedDateTime now]
-  (let [zone (.getZone now)
-        local-date (.toLocalDate now)
-        week-start (.with local-date (TemporalAdjusters/previousOrSame DayOfWeek/MONDAY))
-        week-end (.plusDays week-start 4)]
-    {:start (.atStartOfDay week-start zone)
-     :end (.atStartOfDay week-end zone)}))
 
 ; Convert an event's dateTime to the given timezone
 (defn- event-time->zoned

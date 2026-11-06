@@ -1,7 +1,10 @@
 (ns crestron-week-display.graph
   (:require [cheshire.core :as json]
             [hato.client :as hc])
-  (:import [java.time Instant]))
+  (:import [java.time DayOfWeek Instant ZonedDateTime ZoneId]
+           [java.time.temporal TemporalAdjusters]))
+
+(set! *warn-on-reflection* true)
 
 (defonce ^:private token-cache (atom nil))
 
@@ -10,7 +13,7 @@
   (assoc token :expires_at (.plusSeconds (Instant/now) expires_in)))
 
 (defn- expires-within-5-minutes?
-  [{:keys [expires_at] :as token}]
+  [{:keys [^Instant expires_at] :as token}]
   (let [in-5-min (.plusSeconds (Instant/now) 300)]
     (.isBefore expires_at in-5-min)))
 
@@ -38,6 +41,19 @@
       (:access_token cached-token))
     (:access_token (reset! token-cache (fetch-token! config)))))
 
+; Return the work week for a corresponding now Instant.
+; Assumes the work week starts on a Monday and lasts for
+; 5 total days (e.g. Mon-Fri). May chaneg that in the future.
+(defn work-week-bounds
+  [{:keys [^String time-zone]} ^Instant now]
+  (let [zone (ZoneId/of time-zone)
+        zoned-now (.atZone now zone)
+        local-date (.toLocalDate zoned-now)
+        week-start (.with local-date (TemporalAdjusters/previousOrSame DayOfWeek/MONDAY))
+        week-end (.plusDays week-start 4)]
+    {:start (.atStartOfDay week-start zone)
+     :end (.atStartOfDay week-end zone)}))
+
 ; Returns a vector of events. Each event has the following shape:
 ; {:@odata.etag "<ETAG>"
 ;  :id "<ID>"
@@ -48,15 +64,16 @@
 ;  :start {:dateTime "2026-11-02T18:00:00.0000000" :timeZone "UTC"}
 ;  :end {:dateTime "2026-11-09T18:00:00.0000000" :timeZone "UTC"}}
 (defn week-events
-  [config room-id start end]
-  (let [room (get (:rooms config) room-id)
+  [config now room-id]
+  (let [{:keys [^ZonedDateTime start ^ZonedDateTime end]} (work-week-bounds config now)
+        room (get (:rooms config) room-id)
         resp (hc/get (str "https://graph.microsoft.com/v1.0/users/"
                           (:email room)
                           "/calendar/calendarView")
                      {:headers {"Authorization" (str "Bearer " (access-token config))
                                 "Prefer" "outlook.timezone=\"UTC\""}
-                      :query-params {"startDateTime" start ; "2026-11-02T00:00:00Z"
-                                     "endDateTime" end ; "2026-11-09T00:00:00Z"
+                      :query-params {"startDateTime" (str (.toInstant start)) ; "2026-11-02T00:00:00Z"
+                                     "endDateTime" (str (.toInstant end)) ; "2026-11-09T00:00:00Z"
                                      "$select" "subject,start,end,isCancelled,showAs,sensitivity"
                                      "$top" "100"}
                       :as :json})]
