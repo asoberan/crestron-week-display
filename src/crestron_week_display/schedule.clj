@@ -33,8 +33,49 @@
      :start (event-time->zoned start zone)
      :end (event-time->zoned end zone)}))
 
+; Returns the schedule for the next work week.
+; Vector of normalized events grouped by day of the week
+; as LocalDate
 (defn week-schedule
   [events zone]
-  (->> events
-       (map #(normalize-event % zone))
-       (filter :visible?)))
+  (let [get-day (fn [{:keys [^ZonedDateTime start]}]
+                  (.toLocalDate start))]
+    (->> events
+         (map #(normalize-event % zone))
+         (filter :visible?)
+         (group-by get-day)
+         (into (sorted-map)))))
+
+; Given an event and now, returns whether the event
+; is currently happening
+(defn happening?
+  [{:keys [^ZonedDateTime start
+           ^ZonedDateTime end]} ^Instant now]
+  (let [zoned-now (.atZone now (.getZone start))]
+    (and
+     (.isAfter zoned-now start)
+     (.isBefore zoned-now end))))
+
+; Returns the event happening next given a list of events
+; and now
+(defn get-next-event
+  [events ^Instant now]
+  (let [after? (fn [{:keys [^ZonedDateTime start]} ^Instant now]
+                 (let [zoned-now (.atZone now (.getZone start))]
+                   (.isAfter start zoned-now)))]
+    (->> events
+         (filter #(after? % now))
+         (sort-by :start)
+         first)))
+
+; Given a list of events, determins the current status of the room.
+; Either {:status :busy :until <time> :event <event>} or
+; {:status :free :until <time>}
+(defn current-status
+  [events ^Instant now]
+  (if-let [current-event (some #(when (happening? % now) %) events)]
+    {:status :busy
+     :until (:end current-event)
+     :event current-event}
+    {:status :free
+     :until (:start (get-next-event all-events now))}))
