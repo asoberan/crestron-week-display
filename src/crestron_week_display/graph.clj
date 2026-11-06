@@ -61,4 +61,4 @@
                                      "$top" "100"}
                       :as :json})]
     (when (= 200 (:status resp))
-      (:body resp))))
+      (get-in resp [:body :value]))))
