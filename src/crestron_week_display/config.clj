@@ -13,11 +13,13 @@
 (s/def ::client-id string?)
 (s/def ::client-secret string?)
 (s/def ::port int?)
+(s/def ::time-zone string?)
 
 (s/def ::config (s/keys :req-un [::tenant ::client-id ::client-secret ::rooms]
-                        :opt-un [::port]))
+                        :opt-un [::port ::time-zone]))
 
-(def default-config {:port 3000})
+(def default-config {:port 3000
+                     :time-zone "America/New_York"})
 
 (defn load-config
   [file-path]
