@@ -1,8 +1,24 @@
 (ns crestron-week-display.view
   (:require [clojure.string :as str]
             [hiccup2.core :as h])
-  (:import [java.time ZonedDateTime]
-           [java.time.format DateTimeFormatter]))
+  (:import [java.time Duration ZonedDateTime]
+           [java.time.format DateTimeFormatter]
+           [java.time.temporal ChronoUnit]))
+
+;; Convert a LocalDateTime to the number of minutes
+;; since midnight. This should probably go into a
+;; separate namespace.
+(defn- minutes-from-midnight
+  [time]
+  (let [midnight (-> time .toLocalDate .atStartOfDay)]
+    (.between (ChronoUnit/MINUTES) midnight time)))
+
+;; Get the duration between a start and end. Both
+;; are LocalDateTime. This should probably go into
+;; a separate namespace
+(defn- duration
+  [start end]
+  (.toMinutes (Duration/between start end)))
 
 (defn html-head
   [room-name]
@@ -43,8 +59,20 @@
   [:div.gutter
    (for [n (range 8 13)]
      [:div.hour-label (str n " AM")])
-   (for [n (range 1 6)]
+   (for [n (range 1 10)]
      [:div.hour-label (str n " PM")])])
+
+(defn event-html
+  [{:keys [title start end]}]
+  (let [minutes-from-midnight (minutes-from-midnight start)
+        duration (duration start end)
+        format-time #(.format % (DateTimeFormatter/ofPattern "hh:mm a"))]
+    [:article.event
+     {:style (str "--start:" minutes-from-midnight "; "
+                  "--duration:" duration)}
+     [:div.title title]
+     [:div.meta
+      (str (format-time start) " - " (format-time end))]]))
 
 (defn calendar-body
   [schedule now]
@@ -53,10 +81,8 @@
    (for [[day events] schedule
          :let [today? (= (.getDayOfWeek day) (.getDayOfWeek now))]]
      [:section.day (if today? {:class '[today]} {})
-      (for [{:keys [title start end]} events]
-        [:article.event
-         [:div.title title]
-         [:div.meta]])])])
+      (for [event events]
+        (event-html event))])])
 
 (defn calendar-footer
   [now]

@@ -17,13 +17,13 @@
 
 html, body {
     margin: 0;
-    font-size: 14px;
+    font-size: 14px;/
 }
 
 .calendar {
-    --day-start: 480;
+    --day-start: 480; /* 8 AM */
     --hours: 10; /* 8 AM - 6 PM */
-    --hours-height: 52px;
+    --hour-height: 52px;
     --gutter: 64px;
 
     display: flex;
@@ -41,7 +41,7 @@ html, body {
 
 .calendar-day-headers, .calendar-body {
     display: grid;
-    grid-template-columns: var(--gutter) repeat(5, minmax(0, 1fr));
+    grid-template-columns: var(--gutter) repeat(7, minmax(0, 1fr));
 }
 
 .calendar-day-headers {
@@ -79,9 +79,10 @@ html, body {
 }
 
 .hour-label {
+    height: var(--hour-height);
     text-align: right;
+    color: var(--text-muted);
     padding-right: 8px;
-    height: 64px;
     font-size: 12px;
     transform: translateY(-5px); /* Lines up hour label with the hour lines */
 }
@@ -98,11 +99,20 @@ html, body {
         linear-gradient(var(--line) 2px, transparent 1px),
         linear-gradient(var(--line-soft) 2px, transparent 1px);
     background-size:
-        100% 64px,
-        100% 32px;
+        100% var(--hour-height),
+        100% calc(var(--hour-height) / 2);
+}
+
+.day.today {
+    background-color: var(--today-bg);
 }
 
 .event {
+    position: absolute;
+    top: calc((var(--start) - var(--day-start)) * var(--hour-height) / 60);
+    height: calc(var(--duration) * var(--hour-height) / 60 - 1px);
+    width: 100%;
+    
     background: var(--event-bg);
     border-left: 4px solid var(--event-border);
     border-radius: 3px;
@@ -115,6 +125,11 @@ html, body {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.event .meta {
+    font-size: 11px;
+    opacity: 0.85;
 }
 
 .calendar-footer {
