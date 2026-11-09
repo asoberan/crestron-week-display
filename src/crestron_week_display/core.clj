@@ -1,12 +1,12 @@
 (ns crestron-week-display.core
+  (:require
+   [crestron-week-display.config :as config]
+   [crestron-week-display.server :as server])
   (:gen-class))
 
-(defn greet
-  "Callable entry point to the application."
-  [data]
-  (println (str "Hello, " (or (:name data) "World") "!")))
-
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
-  (greet {:name (first args)}))
+  (let [config (-> (first args)
+                   config/load-config
+                   config/validate-config!)]
+    (server/start! config)))
