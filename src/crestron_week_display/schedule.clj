@@ -5,18 +5,18 @@
 
 (set! *warn-on-reflection* true)
 
-; Convert an event's dateTime to the given timezone
+;; Convert an event's dateTime to the given timezone
 (defn- event-time->zoned
   [{:keys [^String dateTime ^String timeZone]} ^ZoneId zone]
   (let [parsed-date (LocalDateTime/parse dateTime)
         zoned-date (.atZone parsed-date (ZoneId/of timeZone))]
     (.withZoneSameInstant zoned-date zone)))
 
-; Returns an event in the shape:
-; {:title "<TITLE>" # Either the subject, or "Busy" when subject is empty of event is private
-;  :visible? true # True if event is not cancelled or not set as "free"
-;  :start "<Zoned date time>"
-;  :end "<Zoned date time>"}
+;; Returns an event in the shape:
+;; {:title "<TITLE>" # Either the subject, or "Busy" when subject is empty of event is private
+;;  :visible? true # True if event is not cancelled or not set as "free"
+;;  :start "<Zoned date time>"
+;;  :end "<Zoned date time>"}
 (defn- normalize-event
   [{:keys [subject
            sensitivity
@@ -35,9 +35,9 @@
      :start (event-time->zoned start zone)
      :end (event-time->zoned end zone)}))
 
-; Return the work week for a corresponding now Instant.
-; Assumes the work week starts on a Monday and lasts for
-; 5 total days (e.g. Mon-Fri). May change that in the future.
+;; Return the work week for a corresponding now Instant.
+;; Assumes the work week starts on a Monday and lasts for
+;; 5 total days (e.g. Mon-Fri). May change that in the future.
 (defn work-week-bounds
   [^ZoneId zone ^Instant now]
   (let [zoned-now (.atZone now zone)
@@ -48,8 +48,8 @@
         end (.atStartOfDay week-end zone)]
     {:start start
      :end end
-     ; Return the range of days between start and end in a collection
-     ; of LocalDate items
+     ;; Return the range of days between start and end in a collection
+     ;; of LocalDate items
      :range (-> start
                 .toLocalDate
                 (.datesUntil (.toLocalDate end))
@@ -88,8 +88,8 @@
      (.isAfter zoned-now start)
      (.isBefore zoned-now end))))
 
-; Returns the event happening next given a list of events
-; and now
+;; Returns the event happening next given a list of events
+;; and now
 (defn get-next-event
   [events ^Instant now]
   (let [after? (fn [{:keys [^ZonedDateTime start]} ^Instant now]
@@ -100,9 +100,9 @@
          (sort-by :start)
          first)))
 
-; Given a list of events, determins the current status of the room.
-; Either {:status :busy :until <time> :event <event>} or
-; {:status :free :until <time>}
+;; Given a list of events, determins the current status of the room.
+;; Either {:status :busy :until <time> :event <event>} or
+;; {:status :free :until <time>}
 (defn current-status
   [schedule ^ZoneId zone ^Instant now]
   (let [today (.toLocalDate (.atZone now zone))]
@@ -113,5 +113,5 @@
        :event current-event}
       {:status :free
        :until nil
-       ;(:start (get-next-event events now))
+       ;;(:start (get-next-event events now))
        })))
