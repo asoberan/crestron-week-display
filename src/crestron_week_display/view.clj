@@ -10,7 +10,7 @@
            :content "60"}]
    [:link {:type "text/css"
            :rel "stylesheet"
-           :href "style.css"}]
+           :href "/css/style.css"}]
    [:title room-name]])
 
 (defn calendar-title-bar
@@ -38,9 +38,9 @@
 (defn hour-labels
   []
   [:div.gutter
-   (for [n (range 8 12)]
+   (for [n (range 8 13)]
      [:div.hour-label (str n " AM")])
-   (for [n (range 1 5)]
+   (for [n (range 1 6)]
      [:div.hour-label (str n " PM")])])
 
 (defn calendar-body

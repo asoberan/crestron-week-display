@@ -2,7 +2,9 @@
   (:require [crestron-week-display.schedule :as sched]
             [crestron-week-display.view :as view]
             [reitit.ring :as ring]
-            [ring.adapter.jetty :as jetty])
+            [ring.adapter.jetty :as jetty]
+            [ring.middleware.resource :refer [wrap-resource]]
+            [ring.middleware.content-type :refer [wrap-content-type]])
   (:import [java.time Instant ZoneId]))
 
 (defn room-handler
@@ -15,16 +17,23 @@
           schedule (sched/week-schedule config now room-id)
           room-status (sched/current-status schedule zone now)]
       {:status 200
+       :headers {"Content-Type" "text/html"}
        :body (str (view/week-page {:room-name (:name room)
                                    :status room-status
                                    :schedule schedule}))})))
 
+(defn router
+  [config]
+  (ring/router [["/health" {:get (fn [_] {:status 200 :body "ok"})}]
+                ["/room/:room-id" {:get (room-handler config)}]]))
+
 (defn app
   [config]
-  (ring/ring-handler
-   (ring/router [["/health" {:get (fn [_] {:status 200 :body "ok"})}]
-                 ["/room/:room-id" {:get (room-handler config)}]])
-   (ring/create-default-handler)))
+  (-> (router config)
+      (ring/ring-handler
+       (ring/create-default-handler))
+      (wrap-resource "public")
+      (wrap-content-type)))
 
 (defn start!
   [{:keys [port] :as config}]
