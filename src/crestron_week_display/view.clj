@@ -26,13 +26,15 @@
                       (str/capitalize (.getMonth end)) " " (.getDayOfMonth end))]]))
 
 (defn calendar-day-headers
-  [schedule]
+  [schedule now]
   [:div.calendar-day-headers
    [:div]
    (for [day (keys schedule)
-         :let [day-of-week (.getDayOfWeek day)
+         :let [today? (= (.getDayOfWeek day) (.getDayOfWeek now))
+               day-of-week (.getDayOfWeek day)
                day-of-month (.getDayOfMonth day)]]
      [:div.day-header
+      (if today? {:class '[today]} {})
       [:span.day-of-week day-of-week]
       [:span.day-of-month day-of-month]])])
 
@@ -66,7 +68,7 @@
   [{:keys [room-name status schedule]} now]
   [:div.calendar
    (calendar-title-bar room-name schedule)
-   (calendar-day-headers schedule)
+   (calendar-day-headers schedule now)
    (calendar-body schedule now)
    (calendar-footer now)])
 

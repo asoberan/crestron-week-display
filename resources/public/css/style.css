@@ -1,26 +1,77 @@
+:root {
+    --bg: #ffffff;
+    --text:          #242424;
+    --text-muted:    #616161;
+    --line:          #e0e0e0;
+    --line-soft:     #f0f0f0;
+    --accent:        #0f6cbd;
+    --today-bg:      #f5faff;
+    --now:           #c4314b;
+
+    --event-bg:      #cfe4fa;
+    --event-border:  #0f6cbd;
+    --event-text:    #0a2e4d;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+    margin: 0;
+    font-size: 14px;
+}
+
+.calendar {
+    --day-start: 480;
+    --hours: 10; /* 8 AM - 6 PM */
+    --hours-height: 52px;
+    --gutter: 64px;
+
+    display: flex;
+    flex-direction: column;
+    max-width: 1280px; /* Will adjust after testing on tablet display */
+    margin: 0 auto;
+}
+
 .calendar-title-bar {
     display: flex;
     align-items: baseline;
     justify-content: space-between;
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--line);
 }
 
 .calendar-day-headers, .calendar-body {
     display: grid;
-    grid-template-columns: 64px repeat(5, minmax(0, 1fr));
+    grid-template-columns: var(--gutter) repeat(5, minmax(0, 1fr));
 }
 
 .calendar-day-headers {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid var(--line);
 }
 
 .day-header {
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-left: 1px solid black;
-    gap: 1em;
+    border-left: 1px solid var(--line);
+    gap: 0.5em;
     padding: 0.5em;
+}
+
+.day-header.today .day-of-week {
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.day-of-month {
+    padding: 0.5em;
+}
+
+.day-header.today .day-of-month {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 50%;
+    text-align: center;
+    aspect-ratio: 1;
 }
 
 .gutter {
@@ -28,9 +79,11 @@
 }
 
 .hour-label {
+    text-align: right;
+    padding-right: 8px;
     height: 64px;
     font-size: 12px;
-    transform: translateY(-4px); /* Lines up hour label with the hour lines */
+    transform: translateY(-5px); /* Lines up hour label with the hour lines */
 }
 
 .hour-label:first-child {
@@ -39,12 +92,33 @@
 
 .day {
     position: relative;
-    border-left: 1px solid black;
+    border-left: 1px solid var(--line);
     /* Solid line on the hour, lighter line on the half hour. */
     background-image:
-        linear-gradient(black 2px, transparent 1px),
-        linear-gradient(gray 1px, transparent 1px);
+        linear-gradient(var(--line) 2px, transparent 1px),
+        linear-gradient(var(--line-soft) 2px, transparent 1px);
     background-size:
         100% 64px,
         100% 32px;
+}
+
+.event {
+    background: var(--event-bg);
+    border-left: 4px solid var(--event-border);
+    border-radius: 3px;
+    line-height: 1.3;
+    font-size: 12px;
+}
+
+.event .title {
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.calendar-footer {
+    padding: 6px 16px;
+    color: var(--text-muted);
+    border-top: 1px solid var(--line);
 }
