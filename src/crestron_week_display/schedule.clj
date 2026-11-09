@@ -1,5 +1,6 @@
 (ns crestron-week-display.schedule
-  (:import [java.time LocalDateTime ZonedDateTime ZoneId]))
+  (:require [crestron-week-display.graph :as graph])
+  (:import [java.time Instant LocalDateTime ZonedDateTime ZoneId]))
 
 (set! *warn-on-reflection* true)
 
@@ -37,8 +38,10 @@
 ; Vector of normalized events grouped by day of the week
 ; as LocalDate
 (defn week-schedule
-  [events zone]
-  (let [get-day (fn [{:keys [^ZonedDateTime start]}]
+  [config now room-id]
+  (let [events (graph/week-events config now room-id)
+        zone (ZoneId/of (:time-zone config))
+        get-day (fn [{:keys [^ZonedDateTime start]}]
                   (.toLocalDate start))]
     (->> events
          (map #(normalize-event % zone))
@@ -72,10 +75,14 @@
 ; Either {:status :busy :until <time> :event <event>} or
 ; {:status :free :until <time>}
 (defn current-status
-  [events ^Instant now]
-  (if-let [current-event (some #(when (happening? % now) %) events)]
-    {:status :busy
-     :until (:end current-event)
-     :event current-event}
-    {:status :free
-     :until (:start (get-next-event all-events now))}))
+  [schedule ^ZoneId zone ^Instant now]
+  (let [today (.toLocalDate (.atZone now zone))]
+    (if-let [current-event (some #(when (happening? % now) %)
+                                 (get schedule today))]
+      {:status :busy
+       :until (:end current-event)
+       :event current-event}
+      {:status :free
+       :until nil
+       ;(:start (get-next-event events now))
+       })))

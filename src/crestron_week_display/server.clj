@@ -1,16 +1,34 @@
 (ns crestron-week-display.server
-  (:require [reitit.ring :as ring]
-            [ring.adapter.jetty :as jetty]))
+  (:require [crestron-week-display.schedule :as sched]
+            [crestron-week-display.view :as view]
+            [reitit.ring :as ring]
+            [ring.adapter.jetty :as jetty])
+  (:import [java.time Instant ZoneId]))
+
+(defn room-handler
+  [config]
+  (fn [request]
+    (let [room-id (get-in request [:path-params :room-id])
+          room (get (:rooms config) room-id)
+          now (Instant/now)
+          zone (ZoneId/of (:time-zone config))
+          schedule (sched/week-schedule config now room-id)
+          room-status (sched/current-status schedule zone now)]
+      {:status 200
+       :body (str (view/week-page {:room-name (:name room)
+                                   :status room-status
+                                   :schedule schedule}))})))
 
 (defn app
-  []
+  [config]
   (ring/ring-handler
-   (ring/router [["/health" {:get (fn [_] {:status 200 :body "ok"})}]])
+   (ring/router [["/health" {:get (fn [_] {:status 200 :body "ok"})}]
+                 ["/room/:room-id" {:get (room-handler config)}]])
    (ring/create-default-handler)))
 
 (defn start!
-  [{:keys [port]}]
-  (jetty/run-jetty (app) {:port port :join? false}))
+  [{:keys [port] :as config}]
+  (jetty/run-jetty (app config) {:port port :join? false}))
 
 (defn stop!
   [server]
