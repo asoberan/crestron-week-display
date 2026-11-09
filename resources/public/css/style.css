@@ -1,3 +1,50 @@
-html {
-    background: red;
+.calendar-title-bar {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid black;
+}
+
+.calendar-day-headers, .calendar-body {
+    display: grid;
+    grid-template-columns: 64px repeat(5, minmax(0, 1fr));
+}
+
+.calendar-day-headers {
+    border-bottom: 1px solid black;
+}
+
+.day-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border-left: 1px solid black;
+    gap: 1em;
+    padding: 0.5em;
+}
+
+.gutter {
+    position: relative;
+}
+
+.hour-label {
+    height: 64px;
+    font-size: 12px;
+    transform: translateY(-4px); /* Lines up hour label with the hour lines */
+}
+
+.hour-label:first-child {
+    visibility: hidden;
+}
+
+.day {
+    position: relative;
+    border-left: 1px solid black;
+    /* Solid line on the hour, lighter line on the half hour. */
+    background-image:
+        linear-gradient(black 2px, transparent 1px),
+        linear-gradient(gray 1px, transparent 1px);
+    background-size:
+        100% 64px,
+        100% 32px;
 }

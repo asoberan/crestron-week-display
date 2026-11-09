@@ -18,24 +18,24 @@
   (let [date-range (keys schedule)
         start (first date-range)
         end (last date-range)]
-    [:div.calendar-title
-     [:h1 room-name]
+    [:div.calendar-title-bar
+     [:h1#calendar-title room-name]
      [:div.range (str (str/capitalize (.getMonth start)) " " (.getDayOfMonth start)
                       " - "
                       (str/capitalize (.getMonth end)) " " (.getDayOfMonth end))]]))
 
 (defn calendar-day-headers
   [schedule]
-  [:div.calendar-headers
+  [:div.calendar-day-headers
    [:div]
    (for [day (keys schedule)
          :let [day-of-week (.getDayOfWeek day)
                day-of-month (.getDayOfMonth day)]]
-     [:div.day-head
+     [:div.day-header
       [:span.day-of-week day-of-week]
       [:span.day-of-month day-of-month]])])
 
-(defn hour-labels
+(defn hours-gutter
   []
   [:div.gutter
    (for [n (range 8 13)]
@@ -44,17 +44,18 @@
      [:div.hour-label (str n " PM")])])
 
 (defn calendar-body
-  []
+  [schedule]
   [:div.calendar-body
-   (hour-labels)
-   [:div "THIS WILL BE THE CALENDAR"]])
+   (hours-gutter)
+   (for [day (range (inc (count (keys schedule))))]
+     [:section.day])])
 
 (defn calendar
   [{:keys [room-name status schedule]}]
   [:div.calendar
    (calendar-title-bar room-name schedule)
    (calendar-day-headers schedule)
-   (calendar-body)])
+   (calendar-body schedule)])
 
 (defn week-page
   [{:keys [room-name
