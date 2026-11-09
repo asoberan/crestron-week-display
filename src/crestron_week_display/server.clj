@@ -20,7 +20,8 @@
        :headers {"Content-Type" "text/html"}
        :body (str (view/week-page {:room-name (:name room)
                                    :status room-status
-                                   :schedule schedule}))})))
+                                   :schedule schedule}
+                                  (java.time.LocalDateTime/ofInstant now zone)))})))
 
 (defn router
   [config]
