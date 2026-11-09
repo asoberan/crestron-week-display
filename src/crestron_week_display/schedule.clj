@@ -43,28 +43,43 @@
   (let [zoned-now (.atZone now zone)
         local-date (.toLocalDate zoned-now)
         week-start (.with local-date (TemporalAdjusters/previousOrSame DayOfWeek/MONDAY))
-        week-end (.plusDays week-start 5)]
-    {:start (.atStartOfDay week-start zone)
-     :end (.atStartOfDay week-end zone)}))
+        week-end (.plusDays week-start 5)
+        start (.atStartOfDay week-start zone)
+        end (.atStartOfDay week-end zone)]
+    {:start start
+     :end end
+     ; Return the range of days between start and end in a collection
+     ; of LocalDate items
+     :range (-> start
+                .toLocalDate
+                (.datesUntil (.toLocalDate end))
+                (.collect (java.util.stream.Collectors/toList)))}))
 
-; Returns the schedule for the next work week.
-; Vector of normalized events grouped by day of the week
-; as LocalDate
+;; Organize a collection of normalized-events into a map
+;; with "day in range" as a key and "collection of events"
+;; as a value. Days with no events are empty collections.
+(defn- events-by-day
+  [days-range events]
+  (let [grouped (group-by #(.toLocalDate (:start %)) events)]
+    (into (sorted-map)
+          (map (fn [day] [day (get grouped day [])]))
+          days-range)))
+
+;; Returns the schedule for the next work week.
+;; Vector of normalized events grouped by day of the week
+;; as LocalDate
 (defn week-schedule
   [config now room-id]
- (let [zone (ZoneId/of (:time-zone config))
-       week-bounds (work-week-bounds zone now)
-       events (graph/week-events config weeks-bounds now room-id)
-       get-day (fn [{:keys [^ZonedDateTime start]}]
-                 (.toLocalDate start))]
+  (let [zone (ZoneId/of (:time-zone config))
+        week-bounds (work-week-bounds zone now)
+        events (graph/week-events config week-bounds now room-id)]
     (->> events
          (map #(normalize-event % zone))
          (filter :visible?)
-         (group-by get-day)
-         (into (sorted-map)))))
+         (events-by-day (:range week-bounds)))))
 
-; Given an event and now, returns whether the event
-; is currently happening
+;; Given an event and now, returns whether the event
+;; is currently happening
 (defn happening?
   [{:keys [^ZonedDateTime start
            ^ZonedDateTime end]} ^Instant now]
