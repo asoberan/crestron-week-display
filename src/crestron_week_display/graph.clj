@@ -1,8 +1,7 @@
 (ns crestron-week-display.graph
   (:require [cheshire.core :as json]
             [hato.client :as hc])
-  (:import [java.time DayOfWeek Instant ZonedDateTime ZoneId]
-           [java.time.temporal TemporalAdjusters]))
+  (:import [java.time Instant ZonedDateTime ZoneId]))
 
 (set! *warn-on-reflection* true)
 
@@ -41,19 +40,6 @@
       (:access_token cached-token))
     (:access_token (reset! token-cache (fetch-token! config)))))
 
-; Return the work week for a corresponding now Instant.
-; Assumes the work week starts on a Monday and lasts for
-; 5 total days (e.g. Mon-Fri). May chaneg that in the future.
-(defn work-week-bounds
-  [{:keys [^String time-zone]} ^Instant now]
-  (let [zone (ZoneId/of time-zone)
-        zoned-now (.atZone now zone)
-        local-date (.toLocalDate zoned-now)
-        week-start (.with local-date (TemporalAdjusters/previousOrSame DayOfWeek/MONDAY))
-        week-end (.plusDays week-start 5)]
-    {:start (.atStartOfDay week-start zone)
-     :end (.atStartOfDay week-end zone)}))
-
 ; Returns a vector of events. Each event has the following shape:
 ; {:@odata.etag "<ETAG>"
 ;  :id "<ID>"
@@ -64,8 +50,8 @@
 ;  :start {:dateTime "2026-11-02T18:00:00.0000000" :timeZone "UTC"}
 ;  :end {:dateTime "2026-11-09T18:00:00.0000000" :timeZone "UTC"}}
 (defn week-events
-  [config now room-id]
-  (let [{:keys [^ZonedDateTime start ^ZonedDateTime end]} (work-week-bounds config now)
+  [config week-bounds now room-id]
+  (let [{:keys [^ZonedDateTime start ^ZonedDateTime end]} week-bounds
         room (get (:rooms config) room-id)
         resp (hc/get (str "https://graph.microsoft.com/v1.0/users/"
                           (:email room)

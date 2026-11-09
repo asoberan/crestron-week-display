@@ -1,6 +1,7 @@
 (ns crestron-week-display.schedule
   (:require [crestron-week-display.graph :as graph])
-  (:import [java.time Instant LocalDateTime ZonedDateTime ZoneId]))
+  (:import [java.time DayOfWeek Instant LocalDateTime ZonedDateTime ZoneId]
+           [java.time.temporal TemporalAdjusters]))
 
 (set! *warn-on-reflection* true)
 
@@ -34,15 +35,28 @@
      :start (event-time->zoned start zone)
      :end (event-time->zoned end zone)}))
 
+; Return the work week for a corresponding now Instant.
+; Assumes the work week starts on a Monday and lasts for
+; 5 total days (e.g. Mon-Fri). May change that in the future.
+(defn work-week-bounds
+  [^ZoneId zone ^Instant now]
+  (let [zoned-now (.atZone now zone)
+        local-date (.toLocalDate zoned-now)
+        week-start (.with local-date (TemporalAdjusters/previousOrSame DayOfWeek/MONDAY))
+        week-end (.plusDays week-start 5)]
+    {:start (.atStartOfDay week-start zone)
+     :end (.atStartOfDay week-end zone)}))
+
 ; Returns the schedule for the next work week.
 ; Vector of normalized events grouped by day of the week
 ; as LocalDate
 (defn week-schedule
   [config now room-id]
-  (let [events (graph/week-events config now room-id)
-        zone (ZoneId/of (:time-zone config))
-        get-day (fn [{:keys [^ZonedDateTime start]}]
-                  (.toLocalDate start))]
+ (let [zone (ZoneId/of (:time-zone config))
+       week-bounds (work-week-bounds zone now)
+       events (graph/week-events config weeks-bounds now room-id)
+       get-day (fn [{:keys [^ZonedDateTime start]}]
+                 (.toLocalDate start))]
     (->> events
          (map #(normalize-event % zone))
          (filter :visible?)
