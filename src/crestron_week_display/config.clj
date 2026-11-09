@@ -14,12 +14,20 @@
 (s/def ::client-secret string?)
 (s/def ::port int?)
 (s/def ::time-zone string?)
+(s/def ::week-start #{"Monday"
+                      "Tuesday"
+                      "Wednesday"
+                      "Thursday"
+                      "Friday"
+                      "Saturday"
+                      "Sunday"})
 
 (s/def ::config (s/keys :req-un [::tenant ::client-id ::client-secret ::rooms]
-                        :opt-un [::port ::time-zone]))
+                        :opt-un [::port ::time-zone ::week-start]))
 
 (def default-config {:port 3000
-                     :time-zone "America/New_York"})
+                     :time-zone "America/New_York"
+                     :week-start "Sunday"})
 
 (defn load-config
   [file-path]

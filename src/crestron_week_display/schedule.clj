@@ -1,5 +1,6 @@
 (ns crestron-week-display.schedule
-  (:require [crestron-week-display.graph :as graph])
+  (:require [clojure.string :as str]
+            [crestron-week-display.graph :as graph])
   (:import [java.time DayOfWeek Instant LocalDateTime ZonedDateTime ZoneId]
            [java.time.temporal TemporalAdjusters]))
 
@@ -39,11 +40,11 @@
 ;; Assumes the work week starts on a Monday and lasts for
 ;; 5 total days (e.g. Mon-Fri). May change that in the future.
 (defn work-week-bounds
-  [^ZoneId zone ^Instant now]
+  [^String week-start ^ZoneId zone ^Instant now]
   (let [zoned-now (.atZone now zone)
         local-date (.toLocalDate zoned-now)
-        week-start (.with local-date (TemporalAdjusters/previousOrSame DayOfWeek/MONDAY))
-        week-end (.plusDays week-start 5)
+        week-start (.with local-date (TemporalAdjusters/previousOrSame (DayOfWeek/valueOf (str/upper-case week-start))))
+        week-end (.plusDays week-start 7)
         start (.atStartOfDay week-start zone)
         end (.atStartOfDay week-end zone)]
     {:start start
@@ -71,7 +72,7 @@
 (defn week-schedule
   [config now room-id]
   (let [zone (ZoneId/of (:time-zone config))
-        week-bounds (work-week-bounds zone now)
+        week-bounds (work-week-bounds (:week-start config) zone now)
         events (graph/week-events config week-bounds now room-id)]
     (->> events
          (map #(normalize-event % zone))
