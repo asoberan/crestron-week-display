@@ -50,7 +50,7 @@
         zoned-now (.atZone now zone)
         local-date (.toLocalDate zoned-now)
         week-start (.with local-date (TemporalAdjusters/previousOrSame DayOfWeek/MONDAY))
-        week-end (.plusDays week-start 4)]
+        week-end (.plusDays week-start 5)]
     {:start (.atStartOfDay week-start zone)
      :end (.atStartOfDay week-end zone)}))
 
