@@ -25,6 +25,8 @@
   [:head
    [:meta {:http-equiv "refresh"
            :content "120"}]
+   [:meta {:name "viewport"
+           :content "width=device-width, initial-scale=1"}]
    [:link {:type "text/css"
            :rel "stylesheet"
            :href "/css/style.css"}]
@@ -82,7 +84,8 @@
          :let [today? (= (.getDayOfWeek day) (.getDayOfWeek now))]]
      [:section.day (if today? {:class '[today]} {})
       (for [event events]
-        (event-html event))])])
+        (event-html event))
+      (when today? [:div.now {:style (str "--start:" (minutes-from-midnight now))}])])])
 
 (defn calendar-footer
   [now]
