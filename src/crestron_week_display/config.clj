@@ -6,34 +6,37 @@
 (def email-regex #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}$")
 (s/def ::email (s/and string? #(re-matches email-regex %)))
 (s/def ::name string?)
-(s/def ::room (s/keys :req-un [::email ::name]))
+(s/def ::weekdays? boolean?)
+(s/def ::room (s/keys :req-un [::email ::name]
+                      :opt-un [::weekdays?]))
 (s/def ::rooms (s/map-of string? ::room))
+
+(def default-room {:weekdays? false})
 
 (s/def ::tenant string?)
 (s/def ::client-id string?)
 (s/def ::client-secret string?)
 (s/def ::port int?)
 (s/def ::time-zone string?)
-(s/def ::week-start #{"Monday"
-                      "Tuesday"
-                      "Wednesday"
-                      "Thursday"
-                      "Friday"
-                      "Saturday"
-                      "Sunday"})
 
 (s/def ::config (s/keys :req-un [::tenant ::client-id ::client-secret ::rooms]
-                        :opt-un [::port ::time-zone ::week-start]))
+                        :opt-un [::port ::time-zone]))
 
 (def default-config {:port 3000
-                     :time-zone "America/New_York"
-                     :week-start "Sunday"})
+                     :time-zone "America/New_York"})
 
 (defn load-config
   [file-path]
   (let [config-file (io/file file-path)]
     (if (.exists config-file)
-      (merge default-config (edn/read-string (slurp config-file)))
+      (let [updated-config (-> config-file
+                               slurp
+                               edn/read-string
+                               (update :rooms #(update-vals
+                                                %
+                                                (fn [room]
+                                                  (merge default-room room)))))]
+        (merge default-config updated-config))
       (throw (ex-info "Configuration file not found" {:path file-path})))))
 
 (defn validate-config!

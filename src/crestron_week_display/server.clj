@@ -19,6 +19,7 @@
       {:status 200
        :headers {"Content-Type" "text/html"}
        :body (str (view/week-page {:room-name (:name room)
+                                   :weekdays? (:weekdays? room)
                                    :status room-status
                                    :schedule schedule}
                                   (java.time.LocalDateTime/ofInstant now zone)))})))
@@ -26,7 +27,7 @@
 (defn router
   [config]
   (ring/router [["/health" {:get (fn [_] {:status 200 :body "ok"})}]
-                ["/room/:room-id" {:get (room-handler config)}]]))
+                ["/rooms/:room-id" {:get (room-handler config)}]]))
 
 (defn app
   [config]

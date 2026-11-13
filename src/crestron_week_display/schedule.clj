@@ -37,14 +37,12 @@
      :end (event-time->zoned end zone)}))
 
 ;; Return the work week for a corresponding now Instant.
-;; Assumes the work week starts on a Monday and lasts for
-;; 5 total days (e.g. Mon-Fri). May change that in the future.
 (defn work-week-bounds
-  [^String week-start ^ZoneId zone ^Instant now]
+  [^Boolean weekdays? ^ZoneId zone ^Instant now]
   (let [zoned-now (.atZone now zone)
         local-date (.toLocalDate zoned-now)
-        week-start (.with local-date (TemporalAdjusters/previousOrSame (DayOfWeek/valueOf (str/upper-case week-start))))
-        week-end (.plusDays week-start 7)
+        week-start (.with local-date (TemporalAdjusters/previousOrSame (if weekdays? DayOfWeek/SUNDAY DayOfWeek/MONDAY)))
+        week-end (.plusDays week-start (if weekdays? 7 5))
         start (.atStartOfDay week-start zone)
         end (.atStartOfDay week-end zone)]
     {:start start
@@ -72,7 +70,8 @@
 (defn week-schedule
   [config now room-id]
   (let [zone (ZoneId/of (:time-zone config))
-        week-bounds (work-week-bounds (:week-start config) zone now)
+        weekdays? (get-in config [:rooms room-id :weekdays?])
+        week-bounds (work-week-bounds weekdays? zone now)
         events (graph/week-events config week-bounds now room-id)]
     (->> events
          (map #(normalize-event % zone))

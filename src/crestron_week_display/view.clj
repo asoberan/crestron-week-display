@@ -21,7 +21,7 @@
   (.toMinutes (Duration/between start end)))
 
 (defn html-head
-  [room-name]
+  [room-name weekdays?]
   [:head
    [:meta {:http-equiv "refresh"
            :content "120"}]
@@ -30,6 +30,10 @@
    [:link {:type "text/css"
            :rel "stylesheet"
            :href "/css/style.css"}]
+   [:style
+    (str ".calendar-day-headers, .calendar-body { "
+         "grid-template-columns: var(--gutter) repeat("
+         (if weekdays? 7 5) ", minmax(0, 1fr)); }")]
    [:title room-name]])
 
 (defn calendar-title-bar
@@ -103,12 +107,13 @@
 
 (defn week-page
   [{:keys [room-name
+           weekdays?
            status
            schedule] :as room-data}
    now]
   (h/html
       (h/raw "<!DOCTYPE html>")
       [:html
-       (html-head room-name)
+       (html-head room-name weekdays?)
        [:body
         (calendar room-data now)]]))
