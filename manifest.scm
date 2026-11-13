@@ -1,4 +1,7 @@
 (specifications->manifest
- '("clojure"
+ '("bash"
+   "clojure"
    "clojure-tools"
-   "git"))
+   "coreutils"
+   "git"
+   "openjdk"))

@@ -66,7 +66,6 @@ html, body {
 
 .calendar-day-headers, .calendar-body {
     display: grid;
-    grid-template-columns: var(--gutter) repeat(7, minmax(0, 1fr));
 }
 
 .calendar-day-headers {
