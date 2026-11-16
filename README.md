@@ -3,7 +3,7 @@
 A simple web application that uses the Microsoft Graph API to generate a weekly view of a calendar.
 The intention is for this to be displayed on a Crestron TS-1080, as the default Crestron Scheduling application does not allow for a week view of a resource calendar.
 
-## TODO: Configuration
+## Configuration
 
 The configuration is an EDN file with the following values:
 
@@ -44,10 +44,17 @@ You can update the version (and SCM tag) information in generated `pom.xml` by u
 
 If you don't want the `pom.xml` file in your project, you can remove it. The `ci` task will still generate a minimal `pom.xml` as part of the `uber` task, unless you remove `version` from `build.clj`.
 
-Run that uberjar:
+Copy the example configuration file and edit it with the appropriate values.
 
 ```bash
-java -jar target/net.clojars.asoberan/crestron-week-display-0.1.0-SNAPSHOT.jar
+cp examples/config.example.edn examples/config.edn
+nano examples/config.edn
+```
+
+Install the uberjar using `install.sh`:
+
+```bash
+sudo ./install.sh
 ```
 
 ## License

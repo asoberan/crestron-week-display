@@ -1,0 +1,14 @@
+[Unit]
+Description=Crestron Week Display
+
+[Service]
+Type=simple
+DynamicUser=yes
+LoadCredential=config.edn:/etc/crestron-week-display/config.edn
+EnvironmentFile=-/etc/crestron-week-display/.env
+ExecStart=/usr/bin/java $JAVA_OPTS -jar /opt/crestron-week-display/crestron-week-display.jar "${CREDENTIALS_DIRECTORY}/config.edn"
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

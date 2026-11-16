@@ -1,0 +1,7 @@
+{:tenant "<TENANT_ID>"
+ :client-id "<CLIENT_ID>"
+ :client-secret "<CLIENT_SECRET>"
+ :rooms {"room-1" {:email "room-1-res@example.com"
+                   :name "Room 1"}
+         "room-2" {:email "room-2-res@example.com"
+                   :name "Room 2"}}}
